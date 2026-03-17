@@ -1,0 +1,97 @@
+# Import libraries
+import pandas as pd
+import random
+
+
+# Step 1: Create Synthetic Dataset
+
+random.seed(42)
+
+regions = ['North', 'South', 'East', 'West']
+categories = ['Electronics', 'Clothing', 'Home & Garden', 'Sports', 'Books']
+salespersons = ['Alice', 'Bob', 'Carol', 'David', 'Emma', 'Frank']
+
+data = {
+    'transaction_id': range(1001, 1201),
+    'region': [random.choice(regions) for _ in range(200)],
+    'category': [random.choice(categories) for _ in range(200)],
+    'salesperson': [random.choice(salespersons) for _ in range(200)],
+    'sales_amount': [round(random.uniform(50, 5000), 2) for _ in range(200)],
+    'customer_id': [random.randint(5000, 5100) for _ in range(200)]
+}
+
+df = pd.DataFrame(data)
+
+print("Dataset Preview:")
+print(df.head())
+print("\nDataset Shape:", df.shape)
+
+
+# Task 1: Basic Grouping
+
+
+# 1. Total sales per region
+region_sales = df.groupby('region')['sales_amount'].sum().reset_index()
+region_sales = region_sales.sort_values(by='sales_amount', ascending=False)
+
+print("\nTotal Sales by Region:")
+print(region_sales)
+
+# 2. Count transactions per category
+category_count = df.groupby('category')['transaction_id'].count().reset_index()
+print("\nTransaction Count by Category:")
+print(category_count)
+
+# 3. Average sales per salesperson
+salesperson_avg = df.groupby('salesperson')['sales_amount'].mean().reset_index()
+print("\nAverage Sales by Salesperson:")
+print(salesperson_avg)
+
+
+# Task 2: Multi-column Grouping
+
+
+# 1. Region + Category total sales
+region_category_sales = df.groupby(['region', 'category'])['sales_amount'].sum().reset_index()
+print("\nSales by Region and Category:")
+print(region_category_sales.head())
+
+# 2. Salesperson multiple aggregations
+salesperson_stats = df.groupby('salesperson')['sales_amount'].agg(['sum', 'mean', 'count']).reset_index()
+
+# Sort by total sales
+salesperson_stats = salesperson_stats.sort_values(by='sum', ascending=False)
+
+print("\nSalesperson Performance:")
+print(salesperson_stats)
+
+# 3. Category with maximum revenue
+category_sales = df.groupby('category')['sales_amount'].sum()
+top_category = category_sales.idxmax()
+
+print("\nTop Revenue Category:", top_category)
+
+
+# Task 3: Custom Aggregation
+
+
+# Custom function
+def sales_range(x):
+    return x.max() - x.min()
+
+# Apply aggregation by region
+region_analysis = df.groupby('region')['sales_amount'].agg(
+    ['sum', 'mean', 'min', 'max', sales_range]
+).reset_index()
+
+print("\nRegion Analysis with Custom Function:")
+print(region_analysis)
+
+# Final summary report
+summary_report = df.groupby('region').agg({
+    'sales_amount': ['sum', 'mean'],
+    'customer_id': 'count'
+}).reset_index()
+
+print("\nFinal Summary Report:")
+print(summary_report)
